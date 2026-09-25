@@ -8,11 +8,11 @@ Página estática para a pessoa montar um card **"Cheguei no ExpoCommerce"** com
 - Formatos: **Stories 1080×1920** (deixa livres as áreas que o Instagram cobre) e **Feed 1080×1350**
 - Cor de destaque: ciano (evento), laranja (RS) ou verde
 - **Baixar card** gera um PNG. **Compartilhar** abre o menu nativo do celular (Instagram, WhatsApp…) quando o navegador tem suporte
-- **Vídeo pro Instagram (8,5 s, sem som):** começa com uma viagem pelas estrelas; na chegada, uma onda de choque de luz varre a tela e empurra os elementos e termina com os elementos do card entrando um a um. **Ver animação** mostra a prévia no card. **Gerar vídeo** cria um MP4 no formato escolhido, que pode ser baixado ou compartilhado
+- **Vídeo pro Instagram (8,5 s, 60 fps, sem som):** começa com uma viagem pelas estrelas; na chegada, uma onda de choque de luz varre a tela, e os elementos do card entram um a um. **Ver animação** mostra a prévia no card. **Gerar vídeo** cria um MP4 no formato escolhido, que pode ser baixado ou compartilhado
 
 O card é desenhado direto em `<canvas>` ([js/card.js](js/card.js)), então a prévia na tela é o mesmo arquivo que é baixado. Não depende de html2canvas.
 
-O vídeo usa o mesmo desenho: `desenharCena(t)` monta o quadro no segundo `t` (`null` = card final). A codificação usa WebCodecs (`VideoEncoder`) com [mp4-muxer](https://github.com/Vanilagy/mp4-muxer) via jsDelivr e gera um MP4 H.264, quadro a quadro, mais rápido que o tempo real. Sem WebCodecs, a página grava em tempo real com MediaRecorder (MP4 quando o navegador tem suporte; se não tiver, WebM). A linha do tempo de cada elemento fica nas chamadas a `faixa(t, início, fim)` dentro de `desenharCena`.
+O vídeo usa o mesmo desenho: `desenharCena(t)` monta o quadro no segundo `t` (`null` = card final). A codificação usa WebCodecs (`VideoEncoder`) com [mp4-muxer](https://github.com/Vanilagy/mp4-muxer) via jsDelivr e gera um MP4 H.264 a 60 fps, quadro a quadro. A página tenta primeiro a configuração mais forte (perfil High, até 40 Mbps) e só cai para bitrate menor ou 30 fps se o aparelho não suportar. Sem WebCodecs, a página grava em tempo real com MediaRecorder (MP4 quando o navegador tem suporte; se não tiver, WebM). A linha do tempo de cada elemento fica nas chamadas a `faixa(t, início, fim)` dentro de `desenharCena`.
 
 A foto nunca sai do navegador: não há backend.
 

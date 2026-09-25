@@ -258,6 +258,8 @@
       var base = (2 * r) / Math.min(f.naturalWidth, f.naturalHeight);
       var w = f.naturalWidth * base * estado.zoom * escala;
       var h = f.naturalHeight * base * estado.zoom * escala;
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high'; // foto reduzida sem serrilhar
       ctx.drawImage(f, cx - w / 2 + estado.offX * r * escala, cy - h / 2 + estado.offY * r * escala, w, h);
     } else {
       ctx.fillStyle = 'rgba(18,32,85,.85)';
@@ -400,7 +402,7 @@
   //  → elementos do card entrando um a um.
   // ============================================================
   var DURACAO = 8.5;
-  var FPS = 30;
+  var FPS = 60; // vídeo final; cai pra 30 só se o aparelho não codificar 60
 
   function limitar(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
   function faixa(t, a, b) { return t === null ? 1 : limitar((t - a) / (b - a)); }
@@ -540,6 +542,7 @@
     var cor = CORES[estado.cor];
     var video = t !== null;
     tempoCena = t;
+    ctx.imageSmoothingQuality = 'high'; // logos e foto redimensionados com a melhor interpolação
 
     ctx.globalAlpha = 1;
     ctx.fillStyle = NAVY;
@@ -886,12 +889,25 @@
     progressoBarra.style.width = Math.round(p * 100) + '%';
   }
 
+  // Melhor qualidade possível: tenta do mais forte pro mais leve — 60 fps
+  // antes de 30, bitrate alto antes de baixo, perfil High antes de Main/Baseline.
+  // 1080×1920 a 60 fps precisa de H.264 nível 4.2+ (os níveis 4.0 não servem).
   function escolherCodec(H) {
-    var candidatos = ['avc1.640033', 'avc1.640032', 'avc1.640028', 'avc1.4d0033', 'avc1.4d0028', 'avc1.42003e'];
+    var codecs60 = ['avc1.640033', 'avc1.640032', 'avc1.64002a', 'avc1.4d0033', 'avc1.4d002a', 'avc1.42003e'];
+    var codecs30 = ['avc1.640033', 'avc1.640028', 'avc1.4d0028', 'avc1.42003e'];
+    var candidatos = [];
+    [[FPS, codecs60], [30, codecs30]].forEach(function (par) {
+      [40e6, 25e6, 16e6].forEach(function (bitrate) {
+        par[1].forEach(function (codec) {
+          candidatos.push({ codec: codec, width: W, height: H, bitrate: bitrate, framerate: par[0],
+            latencyMode: 'quality', avc: { format: 'avc' } });
+        });
+      });
+    });
     var i = 0;
     function proximo() {
       if (i >= candidatos.length) return Promise.resolve(null);
-      var config = { codec: candidatos[i++], width: W, height: H, bitrate: 12e6, framerate: FPS, avc: { format: 'avc' } };
+      var config = candidatos[i++];
       return VideoEncoder.isConfigSupported(config).then(function (r) {
         return r.supported ? config : proximo();
       }, proximo);
@@ -905,7 +921,7 @@
       if (!config) throw new Error('sem codec H.264');
       var muxer = new Mp4Muxer.Muxer({
         target: new Mp4Muxer.ArrayBufferTarget(),
-        video: { codec: 'avc', width: W, height: H, frameRate: FPS },
+        video: { codec: 'avc', width: W, height: H, frameRate: config.framerate },
         fastStart: 'in-memory'
       });
       var erro = null;
@@ -914,7 +930,8 @@
         error: function (e) { erro = e; }
       });
       encoder.configure(config);
-      var total = Math.round(DURACAO * FPS);
+      var fps = config.framerate;
+      var total = Math.round(DURACAO * fps);
       var i = 0;
 
       return new Promise(function (ok, falha) {
@@ -924,9 +941,9 @@
           if (encoder.encodeQueueSize > 6) { setTimeout(passo, 5); return; }
           var lote = Math.min(total, i + 3);
           for (; i < lote; i++) {
-            desenharCena(i / FPS);
-            var frame = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
-            encoder.encode(frame, { keyFrame: i % FPS === 0 });
+            desenharCena(i / fps);
+            var frame = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round(1e6 / fps) });
+            encoder.encode(frame, { keyFrame: i % fps === 0 });
             frame.close();
           }
           mostrarProgresso(i / total * 0.95);
@@ -935,7 +952,7 @@
             if (erro) throw erro;
             encoder.close();
             muxer.finalize();
-            ok({ blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), ext: 'mp4' });
+            ok({ blob: new Blob([muxer.target.buffer], { type: 'video/mp4' }), ext: 'mp4', fps: fps });
           }).catch(falha);
         }
         passo();
@@ -947,14 +964,14 @@
     var tipos = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
     var tipo = tipos.filter(function (m) { return MediaRecorder.isTypeSupported(m); })[0] || '';
     var stream = canvas.captureStream(FPS);
-    var gravador = new MediaRecorder(stream, { mimeType: tipo, videoBitsPerSecond: 12e6 });
+    var gravador = new MediaRecorder(stream, { mimeType: tipo, videoBitsPerSecond: 40e6 });
     var partes = [];
     gravador.ondataavailable = function (e) { if (e.data.size) partes.push(e.data); };
     return new Promise(function (ok, falha) {
       gravador.onerror = function (e) { falha(e.error || e); };
       gravador.onstop = function () {
         var mime = gravador.mimeType || tipo || 'video/webm';
-        ok({ blob: new Blob(partes, { type: mime }), ext: /mp4/.test(mime) ? 'mp4' : 'webm' });
+        ok({ blob: new Blob(partes, { type: mime }), ext: /mp4/.test(mime) ? 'mp4' : 'webm', fps: FPS });
       };
       desenharCena(0);
       gravador.start();
@@ -1005,7 +1022,7 @@
       acoesVideo.hidden = false;
       btnCompartilharVideo.hidden = !podeCompartilharArquivo(res);
       videoAviso.textContent = res.ext === 'mp4'
-        ? 'Vídeo pronto (MP4, ' + DURACAO + 's). Poste nos stories ou reels e escolha uma música no Instagram.'
+        ? 'Vídeo pronto (MP4, ' + res.fps + ' fps, ' + DURACAO + 's). Poste nos stories ou reels e escolha uma música no Instagram.'
         : 'Vídeo pronto, mas este navegador só gera WebM — o Instagram pode não aceitar. No Chrome ou Safari atualizados sai em MP4.';
     }).catch(function (e) {
       console.error(e);
