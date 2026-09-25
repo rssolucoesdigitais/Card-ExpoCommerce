@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Card Cheguei · ExpoCommerce</title>
+<meta name="description" content="Crie seu card &quot;Cheguei no ExpoCommerce&quot; com a sua foto — ExpoCommerce Uberaba com a RS Soluções Digitais. Poste nos stories ou no feed.">
+<meta name="theme-color" content="#050B24">
+
+<link rel="icon" href="img/favicon-expo-commerce.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon-180.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter+Tight:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="tem-splash">
+
+<!-- splash de abertura: a mesma do site do evento ([PG]ExpoCommerce) -->
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="splash__camera">
+    <span class="splash__estrelas splash__estrelas--1"></span>
+    <span class="splash__estrelas splash__estrelas--2"></span>
+    <span class="splash__estrelas splash__estrelas--3"></span>
+    <span class="splash__forma splash__forma--1"></span>
+    <span class="splash__forma splash__forma--2"></span>
+    <div class="splash__conteudo">
+      <div class="splash__logo-wrap">
+        <img src="img/logo-expo-commerce-branco.png" alt="">
+        <span class="splash__logo-clip"><span class="splash__sweep"></span></span>
+      </div>
+      <p class="splash__eyebrow"><span>1ª edição</span></p>
+      <p class="splash__cidade"><span>Uberaba</span></p>
+      <p class="splash__meta"><span>26 de setembro de 2026 · CDL Hall</span></p>
+      <span class="splash__regua"></span>
+    </div>
+  </div>
+  <span class="splash__vinheta"></span>
+  <span class="splash__scanlines"></span>
+</div>
+
+<header class="topo">
+  <div class="topo__marcas">
+    <img src="img/logo-expo-commerce-branco.png" alt="ExpoCommerce Uberaba" class="topo__expo">
+    <span class="topo__sep" aria-hidden="true"></span>
+    <img src="img/logo-rs-light.png" alt="RS Soluções Digitais" class="topo__rs">
+  </div>
+  <p class="topo__meta">26.SET.2026 · CDL Hall, Uberaba</p>
+</header>
+
+<main class="app">
+  <section class="previa" aria-label="Prévia do card">
+    <div class="previa__moldura" id="moldura">
+      <canvas id="card" width="1080" height="1920" aria-label="Card Cheguei no ExpoCommerce"></canvas>
+    </div>
+    <p class="previa__dica" id="dicaArraste" hidden>Arraste a foto no card pra enquadrar · role ou use o zoom pra aproximar</p>
+  </section>
+
+  <section class="painel" aria-label="Personalizar card">
+    <h1 class="painel__titulo">Monte seu card<br><span>Cheguei no ExpoCommerce</span></h1>
+    <p class="painel__sub">Coloque sua foto, escreva seu nome e poste pra mostrar que você chegou no ExpoCommerce com a RS Soluções Digitais.</p>
+
+    <div class="campo">
+      <span class="campo__rotulo"><b>1</b> Sua foto</span>
+      <input type="file" accept="image/*" id="inputFoto" hidden>
+      <label for="inputFoto" class="soltar" id="zonaFoto">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M9 3l-1.8 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.2L15 3H9Zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg>
+        <span id="zonaFotoTexto">Escolher foto <small>ou arraste o arquivo aqui</small></span>
+      </label>
+      <div class="zoom" id="blocoZoom" hidden>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M5 11h14v2H5z"/></svg>
+        <input type="range" id="zoom" min="1" max="3" step="0.01" value="1" aria-label="Zoom da foto">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+        <button type="button" class="link" id="btnCentralizar">Centralizar</button>
+      </div>
+    </div>
+
+    <div class="campo">
+      <label class="campo__rotulo" for="nome"><b>2</b> Seu nome</label>
+      <input type="text" id="nome" maxlength="40" placeholder="Ex.: Ana Souza" autocomplete="name">
+    </div>
+
+    <div class="campo">
+      <label class="campo__rotulo" for="empresa"><b>3</b> Empresa ou cargo <em>(opcional)</em></label>
+      <input type="text" id="empresa" maxlength="50" placeholder="Ex.: Loja Aurora · E-commerce" autocomplete="organization">
+    </div>
+
+    <div class="linha">
+      <div class="campo">
+        <span class="campo__rotulo">Formato</span>
+        <div class="segmento" role="radiogroup" aria-label="Formato do card">
+          <button type="button" role="radio" aria-checked="true" data-formato="stories">Stories <small>9:16</small></button>
+          <button type="button" role="radio" aria-checked="false" data-formato="feed">Feed <small>4:5</small></button>
+        </div>
+      </div>
+      <div class="campo">
+        <span class="campo__rotulo">Cor de destaque</span>
+        <div class="cores" role="radiogroup" aria-label="Cor de destaque">
+          <button type="button" role="radio" aria-checked="true" data-cor="ciano" style="--c:#2BE0FF" aria-label="Ciano"></button>
+          <button type="button" role="radio" aria-checked="false" data-cor="laranja" style="--c:#F4A035" aria-label="Laranja RS"></button>
+          <button type="button" role="radio" aria-checked="false" data-cor="verde" style="--c:#3DFFB0" aria-label="Verde"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="acoes">
+      <button type="button" class="btn btn--primario" id="btnBaixar" disabled>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4L11 13.6V4a1 1 0 0 1 1-1ZM5 19a1 1 0 1 0 0 2h14a1 1 0 1 0 0-2H5Z"/></svg>
+        Baixar card
+      </button>
+      <button type="button" class="btn" id="btnCompartilhar" disabled hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a2.5 2.5 0 0 0 0-1.4l7.13-4.15c.54.5 1.25.8 2.04.8a3 3 0 1 0-3-3c0 .24.03.48.08.7L8.03 9.81A3 3 0 1 0 5 15a3 3 0 0 0 2.96-3.15l7.13 4.16c-.05.21-.08.44-.08.68a3 3 0 1 0 3-3Z"/></svg>
+        Compartilhar
+      </button>
+    </div>
+    <p class="aviso" id="aviso">Adicione sua foto e seu nome pra liberar o download.</p>
+
+    <div class="video">
+      <div class="video__cab">
+        <span class="campo__rotulo">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M4 5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2.4l4.4 2.9A1 1 0 0 0 23 16.7V7.3a1 1 0 0 0-1.6-.8L17 9.4V7a2 2 0 0 0-2-2H4Z"/></svg>
+          Vídeo pro Instagram
+        </span>
+        <button type="button" class="link" id="btnPrevia">Ver animação</button>
+      </div>
+      <p class="video__sub">Uma viagem pelas estrelas até chegar no seu card, em 8 segundos. O vídeo sai sem som: escolha a música no próprio Instagram.</p>
+      <button type="button" class="btn btn--video" id="btnGerarVideo" disabled>
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 2l2.4 5.6L20 10l-5.6 2.4L12 18l-2.4-5.6L4 10l5.6-2.4L12 2Zm7 13l1 2.3 2.3 1-2.3 1L19 21.6l-1-2.3-2.3-1 2.3-1L19 15Z"/></svg>
+        Gerar vídeo
+      </button>
+      <div class="progresso" id="progresso" hidden><span id="progressoBarra"></span></div>
+      <div class="acoes" id="acoesVideo" hidden>
+        <button type="button" class="btn btn--primario" id="btnBaixarVideo">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4L11 13.6V4a1 1 0 0 1 1-1ZM5 19a1 1 0 1 0 0 2h14a1 1 0 1 0 0-2H5Z"/></svg>
+          Baixar vídeo
+        </button>
+        <button type="button" class="btn" id="btnCompartilharVideo" hidden>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a2.5 2.5 0 0 0 0-1.4l7.13-4.15c.54.5 1.25.8 2.04.8a3 3 0 1 0-3-3c0 .24.03.48.08.7L8.03 9.81A3 3 0 1 0 5 15a3 3 0 0 0 2.96-3.15l7.13 4.16c-.05.21-.08.44-.08.68a3 3 0 1 0 3-3Z"/></svg>
+          Compartilhar vídeo
+        </button>
+      </div>
+      <p class="aviso" id="videoAviso" aria-live="polite"></p>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape">
+  <p>ExpoCommerce Uberaba · 1ª edição · RS Soluções Digitais</p>
+  <p class="rodape__priv">Sua foto é processada só no seu navegador — nada é enviado pra nenhum servidor.</p>
+</footer>
+
+<script src="js/splash.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/build/mp4-muxer.min.js"></script>
+<script src="js/card.js"></script>
+</body>
+</html>
