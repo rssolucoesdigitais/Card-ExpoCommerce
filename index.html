@@ -51,14 +51,7 @@
 </header>
 
 <main class="app">
-  <section class="previa" aria-label="Prévia do card">
-    <div class="previa__moldura" id="moldura">
-      <canvas id="card" width="1080" height="1920" aria-label="Card Cheguei no ExpoCommerce"></canvas>
-    </div>
-    <p class="previa__dica" id="dicaArraste" hidden>Arraste a foto no card pra enquadrar · role ou use o zoom pra aproximar</p>
-  </section>
-
-  <section class="painel" aria-label="Personalizar card">
+  <section class="painel painel--form" aria-label="Personalizar card">
     <h1 class="painel__titulo">Monte seu card<br><span>Cheguei no ExpoCommerce</span></h1>
     <p class="painel__sub">Coloque sua foto, escreva seu nome e poste pra mostrar que você chegou no ExpoCommerce com a RS Soluções Digitais.</p>
 
@@ -104,7 +97,17 @@
         </div>
       </div>
     </div>
+  </section>
 
+  <section class="previa" aria-label="Prévia do card">
+    <h2 class="previa__titulo"><b>4</b> Seu card</h2>
+    <div class="previa__moldura" id="moldura">
+      <canvas id="card" width="1080" height="1920" aria-label="Card Cheguei no ExpoCommerce"></canvas>
+    </div>
+    <p class="previa__dica" id="dicaArraste" hidden>Arraste a foto no card pra enquadrar · role ou use o zoom pra aproximar</p>
+  </section>
+
+  <section class="painel painel--acoes" aria-label="Baixar e compartilhar">
     <div class="acoes">
       <button type="button" class="btn btn--primario" id="btnBaixar" disabled>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a1 1 0 0 1 1 1v9.6l3.3-3.3a1 1 0 1 1 1.4 1.4l-5 5a1 1 0 0 1-1.4 0l-5-5a1 1 0 1 1 1.4-1.4L11 13.6V4a1 1 0 0 1 1-1ZM5 19a1 1 0 1 0 0 2h14a1 1 0 1 0 0-2H5Z"/></svg>

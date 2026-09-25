@@ -56,22 +56,53 @@ button{font:inherit;color:inherit;cursor:pointer;}
 .topo__meta{margin:0;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;color:var(--ink-dim);text-transform:uppercase;}
 
 /* ---------- layout ---------- */
+/* Ordem no HTML = ordem no celular: formulário → card → baixar/vídeo.
+   No computador o card vai pra coluna da direita, ocupando as duas linhas. */
 .app{
   display:grid;
   grid-template-columns:minmax(0, 440px) minmax(0, 1fr);
-  gap:clamp(24px, 4vw, 64px);
+  grid-template-areas:
+    "form  previa"
+    "acoes previa";
+  grid-template-rows:auto 1fr;
+  column-gap:clamp(24px, 4vw, 64px);
+  row-gap:16px;
   align-items:start;
   max-width:1180px;
   margin:0 auto;
   padding:clamp(20px, 4vw, 48px) clamp(16px, 4vw, 48px) 32px;
 }
+.painel--form{grid-area:form;}
+.painel--acoes{grid-area:acoes;}
+.previa{grid-area:previa;}
 @media (max-width: 880px){
-  .app{grid-template-columns:minmax(0, 1fr);}
+  .app{
+    grid-template-columns:minmax(0, 1fr);
+    grid-template-areas:"form" "previa" "acoes";
+    grid-template-rows:auto;
+    row-gap:20px;
+    padding-top:16px;
+  }
 }
 
 /* ---------- prévia ---------- */
-.previa{position:sticky;top:24px;display:flex;flex-direction:column;align-items:center;gap:12px;order:2;}
-@media (max-width: 880px){ .previa{position:static;order:0;} .painel{order:1;} }
+.previa{position:sticky;top:24px;display:flex;flex-direction:column;align-items:center;gap:12px;}
+/* título "4 · Seu card" só aparece no celular, onde o card fica entre o formulário e os botões */
+.previa__titulo{display:none;}
+@media (max-width: 880px){
+  .previa{position:static;}
+  .previa__titulo{
+    display:flex;align-items:center;gap:8px;align-self:stretch;
+    margin:4px 0 0;
+    font-family:var(--font-body);font-size:13px;font-weight:600;
+  }
+  .previa__titulo b{
+    display:inline-grid;place-items:center;
+    width:20px;height:20px;border-radius:50%;
+    background:rgba(43,224,255,.14);color:var(--accent);
+    font-family:var(--font-mono);font-size:11px;font-weight:500;
+  }
+}
 .previa__moldura{
   position:relative;
   line-height:0;
@@ -97,7 +128,6 @@ button{font:inherit;color:inherit;cursor:pointer;}
 
 /* ---------- painel ---------- */
 .painel{
-  order:1;
   background:linear-gradient(180deg, rgba(18,32,85,.55), rgba(10,22,64,.35));
   border:1px solid var(--rule);
   border-radius:20px;
@@ -208,6 +238,7 @@ input[type="file"]:focus-visible + .soltar{outline:2px solid var(--accent);outli
 .btn--primario:hover:not(:disabled){background:linear-gradient(90deg, #5CE8FF, #8DC7FF);}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
 .aviso{margin:12px 0 0;font-size:13px;color:var(--ink-faint);min-height:1.5em;}
+.aviso:empty{display:none;}
 
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 

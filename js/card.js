@@ -839,7 +839,7 @@
   var progresso = document.getElementById('progresso');
   var progressoBarra = document.getElementById('progressoBarra');
   var videoAviso = document.getElementById('videoAviso');
-  var painel = document.querySelector('.painel');
+  var paineis = document.querySelectorAll('.painel');
 
   var animando = false;
   var gravando = false;
@@ -992,7 +992,7 @@
     if (animando) pararPrevia();
     gravando = true;
     animando = true;
-    painel.inert = true;
+    paineis.forEach(function (p) { p.inert = true; });
     btnGerarVideo.disabled = true;
     descartarVideo();
     videoAviso.textContent = 'Gerando o vídeo… não feche a página.';
@@ -1010,7 +1010,7 @@
     function encerrar() {
       gravando = false;
       animando = false;
-      painel.inert = false;
+      paineis.forEach(function (p) { p.inert = false; });
       setTimeout(function () { progresso.hidden = true; }, 600);
       atualizar(); // redesenha o card estático — antes de publicar o vídeo, senão ele seria descartado
     }
