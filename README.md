@@ -8,7 +8,7 @@ Página estática para a pessoa montar um card **"Cheguei no ExpoCommerce"** com
 - Formatos: **Stories 1080×1920** (deixa livres as áreas que o Instagram cobre) e **Feed 1080×1350**
 - Cor de destaque: ciano (evento), laranja (RS) ou verde
 - **Baixar card** gera um PNG. **Compartilhar** abre o menu nativo do celular (Instagram, WhatsApp…) quando o navegador tem suporte
-- **Vídeo pro Instagram (8,5 s, sem som):** começa com uma viagem pelas estrelas, passa por um clarão na chegada e termina com os elementos do card entrando um a um. **Ver animação** mostra a prévia no card. **Gerar vídeo** cria um MP4 no formato escolhido, que pode ser baixado ou compartilhado
+- **Vídeo pro Instagram (8,5 s, sem som):** começa com uma viagem pelas estrelas; na chegada, uma onda de choque de luz varre a tela e empurra os elementos e termina com os elementos do card entrando um a um. **Ver animação** mostra a prévia no card. **Gerar vídeo** cria um MP4 no formato escolhido, que pode ser baixado ou compartilhado
 
 O card é desenhado direto em `<canvas>` ([js/card.js](js/card.js)), então a prévia na tela é o mesmo arquivo que é baixado. Não depende de html2canvas.
 

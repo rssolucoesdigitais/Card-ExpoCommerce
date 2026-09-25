@@ -409,18 +409,82 @@
   function suave(p) { return p * p * (3 - 2 * p); }
 
   // aplica entrada (opacidade + deslocamento + escala em torno de ox,oy)
+  // (a onda de choque da chegada também empurra o elemento quando passa por ele)
   function entrada(p, ox, oy, dy, escalaIni, fn, curva) {
     if (p <= 0) return;
-    if (p >= 1) { fn(); return; }
-    var e = (curva || saidaCubica)(p);
-    var s = escalaIni + (1 - escalaIni) * e;
-    ctx.save();
-    ctx.globalAlpha = limitar(p * 1.6);
-    ctx.translate(ox, oy + dy * (1 - e));
-    ctx.scale(s, s);
-    ctx.translate(-ox, -oy);
-    fn();
-    ctx.restore();
+    var emp = empurraoOnda(ox, oy);
+    if (emp) { ctx.save(); ctx.translate(emp.x, emp.y); }
+    if (p >= 1) {
+      fn();
+    } else {
+      var e = (curva || saidaCubica)(p);
+      var s = escalaIni + (1 - escalaIni) * e;
+      ctx.save();
+      ctx.globalAlpha = limitar(p * 1.6);
+      ctx.translate(ox, oy + dy * (1 - e));
+      ctx.scale(s, s);
+      ctx.translate(-ox, -oy);
+      fn();
+      ctx.restore();
+    }
+    if (emp) ctx.restore();
+  }
+
+  // ---------- onda de choque da chegada ----------
+  // Sai do ponto de fuga da viagem no clarão, varre a tela até passar das
+  // bordas; por onde a frente passa, empurra os elementos pra fora e eles
+  // voltam amortecendo. O fundo dá uma pulsada e a câmera treme de leve.
+  var ONDA_INICIO = 2.9, ONDA_DURACAO = 0.95, ONDA_ALCANCE = 300;
+  var tempoCena = null; // t do quadro sendo desenhado (null = card estático)
+
+  function centroOnda(H) { return { x: W / 2, y: H * 0.46 }; }
+  function raioOnda(t, H) {
+    var p = limitar((t - ONDA_INICIO) / ONDA_DURACAO);
+    var c = centroOnda(H);
+    var max = Math.hypot(W / 2, Math.max(c.y, H - c.y)) * 1.15;
+    return { p: p, r: max * saidaCubica(p) };
+  }
+  // deslocamento que a frente aplica num ponto: 0 quando chega, pico, e volta
+  // a 0 quando a frente já está ONDA_ALCANCE px adiante
+  function empurraoOnda(x, y) {
+    var t = tempoCena;
+    if (t === null || t <= ONDA_INICIO) return null;
+    var H = canvas.height, c = centroOnda(H), o = raioOnda(t, H);
+    var dx = x - c.x, dy = y - c.y, d = Math.hypot(dx, dy) || 1;
+    var k = (o.r - d) / ONDA_ALCANCE;
+    if (k <= 0 || k >= 1) return null;
+    var m = 32 * (1 - 0.5 * o.p) * Math.sin(k * Math.PI) * Math.exp(-k * 1.5);
+    return { x: dx / d * m, y: dy / d * m };
+  }
+
+  function desenharOnda(t, H, cor) {
+    var c = centroOnda(H);
+    // anel principal + um eco mais fino logo atrás
+    [[0, 1], [0.13, 0.55]].forEach(function (cfg) {
+      var o = raioOnda(t - cfg[0], H);
+      if (o.p <= 0 || o.p >= 1) return;
+      var alfa = cfg[1] * Math.pow(1 - o.p, 1.3);
+      var larg = (80 - 60 * o.p) * cfg[1];
+      var ext = o.r + larg * 0.5;
+      var g = ctx.createRadialGradient(c.x, c.y, Math.max(0, o.r - larg * 1.8), c.x, c.y, ext);
+      g.addColorStop(0, hexA(cor.b, 0));
+      g.addColorStop(0.62, hexA(cor.b, alfa * 0.35));
+      g.addColorStop(0.84, hexA(cor.a, alfa * 0.8));
+      g.addColorStop(0.93, 'rgba(255,255,255,' + (alfa * 0.95).toFixed(3) + ')');
+      g.addColorStop(1, hexA(cor.a, 0));
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(c.x, c.y, ext, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function tremor(t) {
+    var dt = t - 2.95;
+    if (dt < 0 || dt > 0.7) return null;
+    var a = 16 * Math.exp(-dt * 7);
+    return { x: a * Math.sin(dt * 71), y: a * 0.6 * Math.cos(dt * 53) };
   }
 
   // velocidade da "nave" (profundidade por segundo) — acelera, cruza, freia
@@ -475,10 +539,15 @@
     var L = LAYOUTS[estado.formato];
     var cor = CORES[estado.cor];
     var video = t !== null;
+    tempoCena = t;
 
     ctx.globalAlpha = 1;
     ctx.fillStyle = NAVY;
     ctx.fillRect(0, 0, W, H);
+
+    var trem = video ? tremor(t) : null;
+    ctx.save();
+    if (trem) ctx.translate(trem.x, trem.y);
 
     if (video) {
       // brilho no ponto de fuga, mais forte quanto mais rápido
@@ -491,7 +560,17 @@
     var pFundo = suave(faixa(t, 2.5, 3.4));
     if (pFundo > 0) {
       ctx.globalAlpha = pFundo;
-      ctx.drawImage(fundoPronto(H, cor), 0, 0);
+      // pulsada do fundo quando a onda sai
+      var pulsada = video ? 0.045 * Math.exp(-Math.pow((t - 3.02) / 0.14, 2)) : 0;
+      if (pulsada > 0.0005) {
+        var co = centroOnda(H);
+        ctx.save();
+        ctx.translate(co.x, co.y); ctx.scale(1 + pulsada, 1 + pulsada); ctx.translate(-co.x, -co.y);
+        ctx.drawImage(fundoPronto(H, cor), 0, 0);
+        ctx.restore();
+      } else {
+        ctx.drawImage(fundoPronto(H, cor), 0, 0);
+      }
       ctx.globalAlpha = 1;
     }
 
@@ -499,11 +578,12 @@
       // depois da chegada as estrelas seguem passando devagar, mais apagadas
       desenharViagem(t, H, cor, 1 - 0.55 * pFundo);
       // clarão da chegada
-      var clarao = 0.42 * Math.exp(-Math.pow((t - 2.95) / 0.2, 2));
+      // (curto e fraco: quem marca o impacto é a onda de choque)
+      var clarao = 0.24 * Math.exp(-Math.pow((t - 2.92) / 0.1, 2));
       if (clarao > 0.01) {
         ctx.globalAlpha = clarao;
         ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(-40, -40, W + 80, H + 80); // folga pro tremor não mostrar a borda
         ctx.globalAlpha = 1;
       }
     }
@@ -534,6 +614,10 @@
         function () { desenharPill(c, L, cor); });
     });
     entrada(faixa(t, 5.7, 6.2), W / 2, L.rodapeY, 16, 1, function () { desenharRodape(L); });
+
+    if (video) desenharOnda(t, H, cor);
+    ctx.restore(); // tremor
+    tempoCena = null;
   }
 
   function desenhar() {
